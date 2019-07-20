@@ -2,7 +2,8 @@ const DEFAULT_FORMAT = [{isStatic:false, type:'number', length: 5, padChar: "0"}
 
 /**
  * Entry point for ID creation object.
- * @param {{isStatic:boolean, type:'string', length:number, padChar:string }[]} format 
+ * @param {{isStatic:boolean, type:'string', length:number, padChar:string }[]} format
+ * @returns {{newFormat:function, getFormat:function,generateID:function()}}
  */
 function idFormat(format = DEFAULT_FORMAT) {
     this.isCompiled = false;
@@ -13,6 +14,44 @@ function idFormat(format = DEFAULT_FORMAT) {
     //Validate and compile the format.
     compile();
 
+    function getFormat() {
+        return _.format;
+    }
+
+    function newFormat() {
+        _.format = [];
+        _.isCompiled = false;
+        _.length = 0;
+        _.fragmentCount = 0;
+        return { addPart };
+    }
+
+
+    /**
+     * Add a part of the id schema.
+     * @param {Boolean} isStatic Is this part static?
+     * @param {String} type If its static, enter the static value
+     * @param {Number} length Length of this part.
+     * @param {String} padChar The padding chart to be used. Default is '0'.
+     * @param {Array} charArray Custom char array to be used of type string.
+     * @returns {{addPart:function, compile: function}}
+     */
+    function addPart(isStatic, type, length, padChar = '0', charArray) {
+        if (typeof isStatic !== 'boolean') throw ('Invalid type. Must be a boolean.');
+        if (typeof length !== 'number') throw ('Invalid type. Must be a number.');
+        if(length > 1 && padChar.length !== 1) throw('Padding char cannot be greater than length 1');
+        const part = { isStatic, type, length };
+        if (type === 'string' || type === 'number') {
+            part.padChar = padChar;
+        }
+        _.format.push(part);
+        return { addPart, compile }
+    }
+
+    /**
+     * Compiles and validates the id fragments into a schema.
+     * @returns {{newFormat:function, getFormat:function,generateID:function()}}
+     */
     function compile() {
         _.fragmentCount = _.format.length;
         if (_.fragmentCount === 0) {
@@ -39,28 +78,7 @@ function idFormat(format = DEFAULT_FORMAT) {
         return true;
     }
 
-    function getFormat() {
-        return _.format;
-    }
 
-    function newFormat() {
-        _.format = [];
-        _.isCompiled = false;
-        _.length = 0;
-        _.fragmentCount = 0;
-        return { addPart };
-    }
-
-    function addPart(isStatic, type, length, padChar = '0', charArray) {
-        if (typeof isStatic !== 'boolean') throw ('Invalid type. Must be a boolean.');
-        if (typeof length !== 'number') throw ('Invalid type. Must be a number.');
-        const part = { isStatic, type, length };
-        if (type === 'string' || type === 'number') {
-            part.padChar = padChar;
-        }
-        _.format.push(part);
-        return { addPart, compile }
-    }
 
     function isValidFragment({ isStatic, type, length, pad }, fragmentIndex) {
         if (typeof isStatic !== 'boolean')
@@ -74,9 +92,9 @@ function idFormat(format = DEFAULT_FORMAT) {
 
     /**
      * Increment the numeric part of id fragment.
-     * @param {string} val 
-     * @param {string} padChar 
-     * @param {number} length 
+     * @param {string} val
+     * @param {string} padChar
+     * @param {number} length
      * @returns {string}
      */
     function incrementNumber(val, padChar, length) {
@@ -94,7 +112,7 @@ function idFormat(format = DEFAULT_FORMAT) {
         //Convert to string.
         let strValue = tmpVal + "";
 
-        //Checkk if the numeric value has grown so large that we need to 
+        //Checkk if the numeric value has grown so large that we need to
         //roll over other format fragments.
         if (strValue.length > val.length) {
             strValue = "1".padStart(length, padChar)
@@ -138,7 +156,7 @@ function idFormat(format = DEFAULT_FORMAT) {
         let startIndex = val.length - 1;
         let carryForward = false;
         const endChar = charDict[charArray[charArray.length - 1]];
-      
+
         for (let i = startIndex; i >= 0; i--) {
           carryForward = false;
           let char = charDict[val.charAt(i)];
@@ -152,14 +170,14 @@ function idFormat(format = DEFAULT_FORMAT) {
           if (!carryForward)
             break;
         }
-      
+
         return { result: val, carry: carryForward };
       }
-      
+
     /**
- * 
- * @param {{type:string, val:string, length:number, pad:string}[]} format 
- * @param {string} lastID 
+ *
+ * @param {{type:string, val:string, length:number, pad:string}[]} format
+ * @param {string} lastID
  */
     function generateID(lastID) {
         const A = 65;
@@ -177,7 +195,7 @@ function idFormat(format = DEFAULT_FORMAT) {
 
         let carryForward = true;
         let result = "";
-        
+
         for (let index = _.fragmentCount - 1; index >= 0; index--) {
             let formatPart = _.format[index];
             startIndex -= formatPart.length;
@@ -186,9 +204,9 @@ function idFormat(format = DEFAULT_FORMAT) {
                 result = formatPart.type + result;
             } else {
                 let length = formatPart.length;
-                
+
                 let part = lastID.substring(startIndex, startIndex + length);
-                
+
                 if (carryForward) {
                     let tmpVal = formatPart.type === 'string' ? incrementString(part, 1, formatPart.padChar, A, Z)
                         : incrementNumber(part,formatPart.padChar, part.length);
