@@ -1,37 +1,42 @@
-## Welcome to GitHub Pages
+## Welcome to AutoID
 
-You can use the [editor on GitHub](https://github.com/wittyPuneet/AutoID/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+AutoID can generate multipart ids based on a given schema. The ids can be consist of multiple static and incrementing fragments with a combination of test and number. Example:
+1. 001 -> 002
+2. 0A-999 -> 0B-001
+3. STATIC-0A-100 -> STATIC-0A-101
+4. AZ-99-STATIC-ZZ-99 -> BA-01-STATIC-0A-01
+_and more..._
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+**In a nutshell, the id is composed of static and dynamic fragments with no limit on how and where they are placed.**
 
-### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+### Usage
+
 
 ```markdown
-Syntax highlighted code block
+const AutoID = require('AutoID');
 
-# Header 1
-## Header 2
-### Header 3
+//Define schema for 001
+const idSchema = AutoID().newFormat()
+    .addPart(false,'number',3)
+    .compile();
+console.log(idSchema.generateID()) //Prints 001
+console.log(idSchema.generateID('001')) //Prints 002
 
-- Bulleted
-- List
+const alphaNumericID = AutoID().newFormat()
+    .addPart(false, 'string', 2)  //Add the dynamic string part.
+    .addPart(true, '-', 1)        //Add the static string part.
+    .addPart(false, 'number', 3)  //Add the dynamic numerical part.
+    .compile();
+console.log(alphaNumericID.generateID()) //Prints 0A-001
+console.log(alphaNumericID.generateID('0A-999')) //Prints 0B-001
 
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+const complexID = AutoID().newFormat()
+    .addPart(false,'string', 3)   //Add the dynamimc string part.
+    .addPart(true,'-AutoID-')     //Add the static part
+    .addPart(false, 'string', 2)  //Add the dynamic string part.
+    .addPart(true, '-')           //Add the static string part.
+    .addPart(false, 'number', 3)  //Add the dynamic numerical part.
+    .compile();
+console.log(complexID.generateID()) //Prints 00A-AutoID-0A-001# Header 1
 ```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/wittyPuneet/AutoID/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
