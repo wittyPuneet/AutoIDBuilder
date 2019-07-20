@@ -4,7 +4,7 @@
   "description": "A simple id generation library for sequential series of alpha-numeric ids. The library allows generating IDs that are either all numeirc, alphabetical, alpha-numeric including a possiblity of mixing static and rolling parts. Example: 00A-001, AAA-001, STATIC-001-AAA-001-STATIC-0, etc",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -25,5 +25,9 @@
   "bugs": {
     "url": "https://github.com/wittyPuneet/AutoID/issues"
   },
-  "homepage": "https://github.com/wittyPuneet/AutoID#readme"
+  "homepage": "https://github.com/wittyPuneet/AutoID#readme",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0"
+  }
 }
