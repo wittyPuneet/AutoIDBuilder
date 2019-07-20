@@ -38,6 +38,9 @@ function idFormat(format = DEFAULT_FORMAT) {
      */
     function addPart(isStatic, type, length, padChar = '0', charArray) {
         if (typeof isStatic !== 'boolean') throw ('Invalid type. Must be a boolean.');
+
+        if(isStatic === true) length = type.length;
+
         if (typeof length !== 'number') throw ('Invalid type. Must be a number.');
         if(length > 1 && padChar.length !== 1) throw('Padding char cannot be greater than length 1');
         const part = { isStatic, type, length };
